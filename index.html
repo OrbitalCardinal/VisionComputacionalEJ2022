@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <!-- https://developer.mozilla.org/en-US/docs/Web/HTTP/CSP -->
+    <meta http-equiv="Content-Security-Policy" content="img-src 'self' data:; default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <link rel="stylesheet" href="style.css">
+    <title>Hello World!</title>
+  </head>
+  <body>
+    <input type="file" id="image_input" accept="image/png,image/jpg">
+    <div class="display-image" id="original-image"></div>
+
+    <button id="process-button">Procesar</button>
+    <span id="image-path"></span>
+    <div class="display-image" id="processed-image"></div>
+  </body>
+  <script src="./renderer.js"></script>
+</html>
