@@ -47,20 +47,54 @@ c_values2 = [((i+1)*n) - 1 for i in range(test.shape[0] // n)]
 x1y1 = list(itertools.product(c_values1, repeat=2))
 x2y2 = list(itertools.product(c_values2, repeat=2))
 
-print(x1y1)
-print(x2y2)
-show_img(test)
+# print(x1y1)
+# print(x2y2)
+# show_img(test)
 
 # Save disjoint blocks
 blocks = []
 for i in range(len(x1y1)):
     blocks.append(test[x1y1[i][0]:x2y2[i][0]+1, x1y1[i][1]:x2y2[i][1]+1])
-    show_img(test[x1y1[i][0]:x2y2[i][0]+1, x1y1[i][1]:x2y2[i][1]+1])
+    # show_img(blocks[i])
 
-# MEMBERS OF PEER GROUP
-d = 1  # DISTANCE
-xi = np.array([5, 6, 9])
-xj = np.array([4, 5, 8])
-distance_btw = euclidean_norm(xi) - euclidean_norm(xj)
-is_member = distance_btw <= d
-print(is_member)
+
+# PEER GROUPS
+# print(blocks[0])
+
+peer_groups = []
+d = 1
+for i in range(len(blocks)):
+    xi = np.array([
+        blocks[i][0, n // 2, n // 2],
+        blocks[i][1, n // 2, n // 2],
+        blocks[i][2, n // 2, n // 2]
+        ])  # Central pixel
+    flatten = blocks[i].reshape(n, - 1)
+    # print('CENTRAL PIXEL', xi)
+    xi_peer_group = []
+    for j in range(flatten.shape[1]):
+        xj = np.array([flatten[0, j], flatten[1, j], flatten[2, j]])
+        # print(xj)
+
+        # MEMBERS OF PEER GROUP
+        distance_btw = euclidean_norm(xi) - euclidean_norm(xj)
+        is_member = distance_btw <= d
+        if is_member:
+            xi_peer_group.append(())
+    peer_groups.append(xi_peer_group)
+
+# DETECTION PROCEDURE
+# print('DETECTION PROCEDURE')
+
+m = 1
+for i in range(len(blocks)):
+    pg_cardinality = len(peer_groups[i])
+    is_non_corrupted = pg_cardinality >= (m + 1)
+    
+
+
+
+
+
+
+
