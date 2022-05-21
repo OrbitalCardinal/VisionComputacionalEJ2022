@@ -1,3 +1,5 @@
 env
+python-env
+node_modules
 .ipynb_checkpoints
 __pycache__
