@@ -1,12 +1,4 @@
-from os import stat
 import numpy as np
-
-def all_visited(states: dict):
-    states_values = states.values()
-    for value in states_values:
-        if value == 0:
-            return False
-    return True
 
 # matrix = np.random.rand(4,4) * 10
 matrix = np.array([
