@@ -1,0 +1,23 @@
+{
+  "name": "visioncomputacionalej2022",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "electron . "
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/OrbitalCardinal/VisionComputacionalEJ2022.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/OrbitalCardinal/VisionComputacionalEJ2022/issues"
+  },
+  "homepage": "https://github.com/OrbitalCardinal/VisionComputacionalEJ2022#readme",
+  "devDependencies": {
+    "electron": "^18.0.1"
+  }
+}
