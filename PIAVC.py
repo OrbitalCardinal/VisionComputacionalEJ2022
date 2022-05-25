@@ -7,8 +7,6 @@ from matplotlib import pyplot as plt
 import colorsys
 
 
-
-
 # Detection de esquinas de la imagen
 
 def hsl(imagen_inicial):
@@ -215,17 +213,26 @@ def contraste(img):
     return image1
 
 
-def main():
+def main(path):
+    def show_img(img, colormode='gray'):
+        dim = img.shape
+        colormap = 'gray' if len(dim) < 3 else None
+        colormode = 'L' if len(dim) < 3 else 'RGB'
+        img = Image.fromarray(np.uint8(img), colormode)
+        plt.imshow(img, colormap)
+        plt.axis('off')
+        plt.show()
+
     # 1- Adquisicion de la imagen RGB
-    image = Image.open('g1.png')
-    img = cv2.imread('g1.png')
+    image = Image.open(path)
+    img = cv2.imread(path)
     
     # 1.1 - Obtencion de vecindarios 
-    Output1 = contraste('g1.png')
+    Output1 = contraste(path)
     output1 = cv2.imread('output1.png')
     
     # 2 Detectamos las esquinas de la hoja
-    Output2 = gris("g1.png")
+    Output2 = gris(path)
     #Output2 = esquina(Output2)
     output2 = cv2.imread('imagen_gris.png')
     gray = cv2.cvtColor(output2,cv2.COLOR_BGR2GRAY)
@@ -248,15 +255,8 @@ def main():
     #cv2.imwrite("output5.png", hsi)
     output5 = cv2.imread('output5.png')
     
+    show_img(output1, 'L')
+    show_img(output3, 'L')
+    show_img(dst, 'L')
+    show_img(output5, 'L')
 
-    plt.subplot(151),plt.imshow(img)
-    plt.subplot(152),plt.imshow(output1)
-    plt.subplot(153),plt.imshow(output3)
-    plt.subplot(154),plt.imshow(dst)
-    plt.subplot(155),plt.imshow(output5)
-    
-
-
-#return new
-
-main()
