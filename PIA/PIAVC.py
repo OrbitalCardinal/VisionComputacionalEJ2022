@@ -1,13 +1,128 @@
 from math import*
-from PIL import Image
 from sys import argv # Importe para tabajar con argumentos
 import numpy as np
 import cv2
 from matplotlib import pyplot as plt
 import colorsys
+import pandas as pd
+from scipy.stats import entropy
+import tkinter 
+from PIL import Image, ImageTk, ImageDraw, ImageFont
+import math
+import random
 
+
+def readImage(imagen_inicial):
+    
+    imagen_original = Image.open(imagen_inicial)
+    imagen_original = imagen_original.convert('RGB')
+    #escala de grises
+    #toma el valor maximo del rgb de cada pixel
+    
+    x, y = imagen_original.size
+    imagen_gris = Image.new("RGB", (x,y))
+    pixeles = []
+    for a in range(y):
+        for b in range(x):
+            r, g, b = imagen_original.getpixel((b, a))
+            rgb = (r, g, b)
+            data = (r, g, b)
+            pixeles.append(data)
+    print(pixeles)
+
+    
+    return 
+
+
+
+def veredictoFinal(imagen_inicial):
+    pix = 0
+    imperfeccciones = 0
+    imagen_original = Image.open(imagen_inicial)
+    imagen_original = imagen_original.convert('RGB')
+    #escala de grises
+    #toma el valor maximo del rgb de cada pixel
+    
+    x, y = imagen_original.size
+    pixeles = []
+    for a in range(y):
+        for b in range(x):
+            r, g, b = imagen_original.getpixel((b, a))
+            
+            rgb = (r, g, b)
+            print(rgb)
+            if(r > 10 or g > 10 or b > 10):
+                pix += 1
+                if(r > 20 or g > 20 or b > 20):
+                    imperfeccciones += 1
+    print(imperfeccciones, pix)
+    porcentaje = (imperfeccciones/pix) * 100
+    if(porcentaje > 90):
+        print("La fruta muestra irregularidades, nos ha trolleado la madre naturaleza")
+
+    else: 
+         print("La fruta no muestra poca o ninguna irregularidad, ¡bien!")
+         
+    print("Probabilidad de imperfeccion: ", porcentaje)
+    return
+    
 
 # Detection de esquinas de la imagen
+
+
+def esquinas(imagen_original):
+    imagen_original = Image.open(imagen_original)
+
+    x, y = imagen_original.size
+    prueba = imagen_original.load()
+    nueva_imagen = imagen_original.copy()
+    prueba_nueva = nueva_imagen.load() 
+    minimo = 20
+
+    #x es el ancho
+    #y es la altura
+    for i in range(x):
+        for j in range(y):    
+            pix = []
+            for q in [-1, 0, 1]:
+                for w in [-1, 0, 1]:
+                    if 0 <= i+q  < x and 0 <= j+w  < y: 
+                        pix.append(prueba[i+q,j+w][1])
+            pix.sort()
+            mediana= len(pix)/2
+            
+            if len(pix)%2 == 0:
+                med=(pix[round(mediana)]+pix[round(mediana)-1])/2
+            else:
+                med=pix[round(mediana)]  
+            prueba_nueva[i,j] = (round(med),round(med),round(med))
+    
+    for i in range(x):
+       for j in range(y):
+           otro= prueba_nueva[i,j][0]-prueba[i,j][0]
+           if otro < 0:
+               otro = 0
+           if otro > 255:
+               otro = 255
+           if otro > minimo:
+               prueba[i,j]= (otro,otro,otro)
+           else:
+               prueba[i,j]=(0,0,0)
+    lista = []
+
+    for i in range(x):
+        for j in range(y):
+            if imagen_original.getpixel((i,j))!=(0,0,255) and imagen_original.getpixel((i,j))!=(0,0,0):
+                lista.append(( imagen_original, (0,0,255)))
+                for a in range(-2,3):
+                    for b in range(-2,3):
+                        if 0 <= i+a  < x and 0 <= j+b  < y:
+                            prueba[i+a,j+b] = (0,0,255)
+    
+    imagen_original.save('output6.png') 
+    print("6- Uso de mascaras para el resaltado de la imagen", prueba)
+    return imagen_original, lista
+
 
 def hsl(imagen_inicial):
     
@@ -33,6 +148,8 @@ def hsl(imagen_inicial):
             (r, g, b) = colorsys.hsv_to_rgb(h, s, v)
             data = (h, s, v)
             pixeles.append(data)
+    print("5- En este paso convertimos nuestra imagen resultante de RHB a HSI", pixeles)
+    
     imagen_gris.putdata(pixeles)
     imagen_gris.save("output5.png")
     
@@ -68,60 +185,8 @@ def gris(imagen_inicial):
             pixeles.append(data)
     imagen_gris.putdata(pixeles)
     imagen_gris.save("imagen_gris.png")
+    print("Matriz convertida a escala de grises: ", pixeles)
     return imagen_gris
-
-def esquina(imagen_original):
-
-    x, y = imagen_original.size
-    prueba = imagen_original.load()
-    nueva_imagen = imagen_original.copy()
-    prueba_nueva = nueva_imagen.load() 
-    minimo = 10
-
-    #x es el ancho
-    #y es la altura
-    for i in range(x):
-        for j in range(y):    
-            pix = []
-            for q in [-1, 0, 1]:
-                for w in [-1, 0, 1]:
-                    if 0 <= i+q  < x and 0 <= j+w  < y: 
-                        pix.append(prueba[i+q,j+w][1])
-            pix.sort()
-            mediana= len(pix)/2
-            
-            if len(pix)%2 == 0:
-                med=(pix[round(mediana)]+pix[round(mediana)-1])/2
-            else:
-                med=pix[round(mediana)]  
-            prueba_nueva[i,j] = (round(med),round(med),round(med))
-    
-    for i in range(x):
-       for j in range(y):
-           otro= prueba_nueva[i,j][1]-prueba[i,j][1]
-           if otro < 0:
-               otro = 0
-           if otro > 255:
-               otro = 255
-           if otro > minimo:
-               prueba[i,j]= (otro,otro,otro)
-           else:
-               prueba[i,j]=(0,0,0)
-    lista = []
-
-    for i in range(x):
-        for j in range(y):
-            if imagen_original.getpixel((i,j))!=(255,255,255) and imagen_original.getpixel((i,j))!=(0,0,0):
-                lista.append(( imagen_original, (255,255,255)))
-                for a in range(-2,3):
-                    for b in range(-2,3):
-                        if 0 <= i+a  < x and 0 <= j+b  < y:
-                            prueba[i+a,j+b] = (255,255,255)
-    
-    imagen_original.save('output2.png')
-        
-    return imagen_original, lista
-
 
 def obtener_matrices(image):
     image = Image.open(image) 
@@ -141,6 +206,10 @@ def obtener_matrices(image):
             matrizg[i,j] = a[1]
             matrizb[i,j] = a[2]
             
+        
+    print("2- Aplicamos un filtro para segmentar por color antes de aplicar bordes", matrizr)
+    print("2- Aplicamos un filtro para segmentar por color antes de aplicar bordes", matrizg)
+    print("2- Aplicamos un filtro para segmentar por color antes de aplicar bordes", matrizb)        
     df = image.save('escala.png')
     return image,matrizr, matrizg, matrizb
 
@@ -182,6 +251,7 @@ def filtro(image):
                 
             
     image.save('PIAVecindarios.png')
+    print("Matriz de los vaolores de los filtros: ", pixels)
     return image
 
 
@@ -207,56 +277,131 @@ def contraste(img):
     imagen = filtro(img)
     new = 'output1.png'
     image1.save(new)
+    print("Matriz de el contraste de la imagen: ", pixels)
     #fin = time()
     #tiempo_t = fin - inicio
     #print "Tiempo que tardo en ejecutarse binzarizar = "+str(tiempo_t)+" segundos"
     return image1
 
-
-def main(path):
-    def show_img(img, colormode='gray'):
-        dim = img.shape
-        colormap = 'gray' if len(dim) < 3 else None
-        colormode = 'L' if len(dim) < 3 else 'RGB'
-        img = Image.fromarray(np.uint8(img), colormode)
-        plt.imshow(img, colormap)
-        plt.axis('off')
-        plt.show()
-
-    # 1- Adquisicion de la imagen RGB
-    image = Image.open(path)
-    img = cv2.imread(path)
+def entropia(imagen_inicial):
+    imagen_original = Image.open(imagen_inicial)
+    imagen_original = imagen_original.convert('RGB')
+    #escala de grises
+    #toma el valor maximo del rgb de cada pixel
     
-    # 1.1 - Obtencion de vecindarios 
-    Output1 = contraste(path)
+    x, y = imagen_original.size
+    imagen_gris = Image.new("RGB", (x,y))
+    pixeles = []
+    for a in range(y):
+        for b in range(x):
+            pd_series = pd.Series(a)
+            counts = pd_series.value_counts()
+            entropya = entropy(counts)
+                #se elige el valor mas grande
+            data = (int(round(entropya)), int(round(entropya)), int(round(entropya)))
+            pixeles.append(data)
+    imagen_gris.putdata(pixeles)
+    imagen_gris.save("output7.png")
+    print("Matriz de la entropia de la imagen: ", pixeles)
+    return entropya   
+
+
+    
+
+def main(file):
+    # 1- Adquisicion de la imagen RGB
+
+    
+    image = Image.open(file)
+    img = cv2.imread(file)
+    res = cv2.resize(img, dsize=(480, 480), interpolation=cv2.INTER_CUBIC)
+    img1 = cv2.imwrite(file, res)
+    plt.imshow(img)
+    input("Oprime un boton para continuaar...")
+    
+    # 1.1 - Obtencion de vecindarios, filtro de clasificacion por colores
+    Output1 = contraste(file)
     output1 = cv2.imread('output1.png')
+    plt.imshow(output1)
+    input("Oprime un boton para continuaar...")
     
     # 2 Detectamos las esquinas de la hoja
-    Output2 = gris(path)
+    Output2 = gris('output1.png')
     #Output2 = esquina(Output2)
     output2 = cv2.imread('imagen_gris.png')
     gray = cv2.cvtColor(output2,cv2.COLOR_BGR2GRAY)
+    plt.imshow(output2)
+    input("Oprime un boton para continuaar...")
     
     output3 = cv2.imread('output2.png')
     output3 = cv2.Canny(gray,50,150,apertureSize = 3)
     cv2.imwrite("output3.png", output3)
     output3 = cv2.imread('output3.png')
-    
+    print("2- Borde Generado, matriz a continuacion")
+    readImage("output3.png")
+    plt.imshow(output3)
+    input("Oprime un boton para continuaar...")
     
     # 3 - Anulamos el ruido de la imagen resultante
     dst = cv2.fastNlMeansDenoisingColored(output3,None,10,10,7,21)
-    cv2.imwrite("output4.png", dst)
+    output4 = cv2.imwrite("output4.png", dst)
+    output4 = cv2.imread('output4.png')
+    print("3- Ruido anulado, matriz a continuacion")
+    readImage("output4.png")
+    plt.imshow(output4)
+    input("Oprime un boton para continuaar...")
     
     # 4 - Acortamos la imagen
-    image = image.resize((240, 240))
+    img4 = cv2.imread('output4.png')
+    res = cv2.resize(img4, dsize=(240, 240), interpolation=cv2.INTER_CUBIC)
+    Output41 = cv2.imwrite("output4.1.png", res)
+    Output41 = cv2.imread('output4.1.png')
+    print("4- Reduccion de imagen, matriz a continuacion")
+    readImage("output3.png")
+    plt.imshow(Output41)
+    input("Oprime un boton para continuaar...")
+
     
     # 5 - RGB a HSI 
-    hsi = hsl("output1.png")
+    hsi = hsl("output4.1.png")
     #cv2.imwrite("output5.png", hsi)
     output5 = cv2.imread('output5.png')
     
-    show_img(output1, 'L')
-    show_img(output3, 'L')
-    show_img(dst, 'L')
-    show_img(output5, 'L')
+    # 6 - Generacion de algunas de las pruebas de textura como mascaras para generar un resultado
+    esquinas("output4.1.png")
+    #entropia("output1.png")
+    output6 = cv2.imread('output6.png')
+    output7 = cv2.imread('output7.png')
+    
+    
+    # 7 Estadisticas
+    veredictoFinal("output5.png") 
+    
+    
+    
+    plt.subplot(181),plt.imshow(img)
+    plt.subplot(182),plt.imshow(output1)
+    plt.subplot(183),plt.imshow(output3)
+    plt.subplot(184),plt.imshow(dst)
+    plt.subplot(185),plt.imshow(output4)
+    plt.subplot(186),plt.imshow(Output41)
+    plt.subplot(187),plt.imshow(output5)
+    plt.subplot(188),plt.imshow(output6)
+    
+
+    
+    
+#return new
+
+
+while True:
+    #file = input("Esccribe el nombre de la imagen")
+    file = "orange_blasco.png"
+    try:
+        cv2.imread(file)
+        main(file)
+        break
+    except FileNotFoundError:
+        print("Imagen no encontrada, revise que este en el mismo directorio: ", FileNotFoundError)
+
 
