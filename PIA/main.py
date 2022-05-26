@@ -7,9 +7,7 @@ print('3. Pydipati 2006. Demo de detección de daño por enfermedad en los citri
 option = int(input('Ingrese la opción del método a aplicar: '))
 if option == 1:
     path = input('Ingrese la ruta de la imagen: ')
-    print('Este método utiliza un algoritmo de K-means.')
-    k = input('Ingrese la cantidad de K centros: ')
-    blasco(path, k)
+    blasco(path)
 elif option == 2:
     path = input('Ingrese la ruta de la imagen: ')
     lopezgarcia(path)
